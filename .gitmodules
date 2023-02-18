@@ -10,3 +10,6 @@
 [submodule "lib/filesystem"]
 	path = lib/filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "lib/libarchive_cpp_wrapper"]
+	path = lib/libarchive_cpp_wrapper
+	url = https://github.com/do-m-en/libarchive_cpp_wrapper.git
