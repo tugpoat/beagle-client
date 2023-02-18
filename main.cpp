@@ -16,11 +16,11 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "ghc/filesystem.hpp"
 
-#include "apiclient.h"
+#include "beagle_client.h"
 #include "utility.h"
 
 // Globals
-
+static const auto delay{std::chrono::microseconds(250)};
 std::atomic<bool> running{true};
 
 void sigHandler(int sig)
@@ -78,7 +78,7 @@ std::string pollNFC(void) {
 	context = nullptr;
 	return retval;
 }
-
+/*
 static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 {
 	bool downloadedSaveData = false;
@@ -114,7 +114,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 		1. user taps nfc card. data is downloaded.
 		2. user plays game
 		3. when device is removed, user taps card to confirm upload. Then, data is uploaded as normal.
-	*/
+	
 
 	while (running)
 	{
@@ -196,7 +196,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 	}
 
 }
-
+*/
 bool readConfig(AppSettings &settings)
 {
 	// Read in config values
@@ -227,7 +227,7 @@ int main()
 
 
 	spdlog::info("Starting NFC Host/Network client");
-	std::thread(NFCHost, settings, &cardHandler->cardSettings).detach();
+	//std::thread(NFCHost, settings, &cardHandler->cardSettings).detach();
 
 	spdlog::info("Entering main loop");
 	while (running) {

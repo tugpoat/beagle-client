@@ -23,7 +23,7 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/inc
 	${PROJECT_SOURCE_DIR}/lib/cpp-httplib
 	${PROJECT_SOURCE_DIR}/lib/mINI/src
-	${PROJECT_SOURCE_DIR}/lib/gulfs/include
+	${PROJECT_SOURCE_DIR}/lib/filesystem/include
 	${PROJECT_SOURCE_DIR}/lib/libarchive_cpp_wrapper
 )
 

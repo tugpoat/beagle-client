@@ -18,7 +18,6 @@
 
 #include "global.h"
 #include "base64.h"
-#include "CardIo.h"
 #include "utility.h"
 
 
