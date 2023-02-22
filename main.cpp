@@ -95,7 +95,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 	httplib::Client httpcli(settings->apiHost, settings->apiPort);
 
 
-	/*
+	
 		Possible flows:
 		NEW DATA
 		1. user comes with nfc card, taps it. no data is downloadable.
@@ -197,7 +197,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 
 }
 */
-bool readConfig(AppSettings &settings)
+bool readAppConfig(AppSettings &settings)
 {
 	// Read in config values
 	mINI::INIFile config("config.ini");
@@ -211,6 +211,7 @@ bool readConfig(AppSettings &settings)
 
 	if (ini.has("config")) {
 		//TODO: Read config
+		settings.targetDevice = ini["config"]["targetdevice"];
 	}
 
 	return true;

@@ -1,7 +1,7 @@
 
 #include "beagle_client.h"
 
-bool ApiClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
+bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 {
 	httplib::MultipartFormDataItems items = {
 		 { "username", settings->apiUser, "", "" },
@@ -15,7 +15,7 @@ bool ApiClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 		spdlog::info("Failed to get bearer token");
 		return false;
 	} else {
-		// startpos = 17, which is how many characters that {"access token":" is made of.
+		// startpos = 17, which is how many characters that {"access token":" is comprised of.
 		// This is kind of a dirty way to do this and isn't very fault/change tolerant.
 		std::size_t endpos = res->body.find("\",\"token_type");
 		this->apiToken = res->body.substr(17, endpos - 17);
@@ -26,7 +26,7 @@ bool ApiClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 	return true;
 }
 
-bool ApiClient::downloadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string dest_path)
+bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string dest_path)
 {
 	spdlog::info("Downloading savedata");
 
@@ -100,7 +100,7 @@ bool ApiClient::downloadSaveData(httplib::Client &cli, AppSettings *settings, st
 	return true;
 }
 
-bool ApiClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string savedata_path)
+bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string savedata_path)
 {
 	spdlog::info("Uploading savedata");
 	std::string tempfilepath = "/tmp/" + savedata_uid + ".tar";
@@ -160,7 +160,7 @@ bool ApiClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, std:
 }
 
 
-std::string ApiClient::bytesToHexString(const unsigned char* str, const uint64_t s) {
+std::string BeagleClient::bytesToHexString(const unsigned char* str, const uint64_t s) {
   std::ostringstream ret;
 
   for (size_t i = 0; i < s; ++i)

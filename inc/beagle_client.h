@@ -23,16 +23,9 @@
 
 
 
-class ApiClient
+class BeagleClient
 {
 public:
-	struct SaveData 
-	{
-		std::string cardData;
-		int gameId;
-		std::string image;
-		std::string dataPayload;
-	} SAVEDATA;
 	std::string formatUid(const uint8_t *pbtData, const size_t szBytes);
 	bool getAuthToken(httplib::Client &, AppSettings *);
 	bool downloadSaveData(httplib::Client &, AppSettings *, std::string, std::string);

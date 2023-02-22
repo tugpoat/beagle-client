@@ -9,7 +9,7 @@
 
 struct AppSettings
 {
-	std::string tgtDevice;
+	std::string targetDevice;
 	unsigned int gameId;
 	std::string apiHost;
 	std::string apiBaseUrl;
