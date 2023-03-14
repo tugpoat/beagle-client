@@ -19,7 +19,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 		// This is kind of a dirty way to do this and isn't very fault/change tolerant.
 		std::size_t endpos = res->body.find("\",\"token_type");
 		this->apiToken = res->body.substr(17, endpos - 17);
-#ifdef NDEBUG
+#ifndef NDEBUG
 		spdlog::debug("Got new bearer token: " + this->apiToken);
 #endif
 	}
@@ -115,7 +115,7 @@ bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, s
 		return false;
 	}
 
-#ifdef NDEBUG
+#ifndef NDEBUG
 	spdlog::debug("tempfile: " + tempfilepath);
 	spdlog::debug("tempfile size: " + std::to_string(filedata.size()));
 #endif

@@ -17,6 +17,8 @@
 #include "ghc/filesystem.hpp"
 
 #include "beagle_client.h"
+#include "device_simulator.h"
+#include "yacardemu_client.h"
 #include "utility.h"
 
 // Globals
@@ -78,8 +80,8 @@ std::string pollNFC(void) {
 	context = nullptr;
 	return retval;
 }
-/*
-static void NFCHost(AppSettings *settings, CardIo::Settings *card)
+
+static void NFCHost(AppSettings *settings)
 {
 	bool downloadedSaveData = false;
 	bool do_download = false;
@@ -91,11 +93,13 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 	unsigned int sleep_for = default_sleep;
 	std::string download_uid;
 
-	ApiClient apiControl;
+	std::unique_ptr<DeviceSimulator> simulator;
+	simulator = std::make_unique<YACardEmuClient>();
+
+	BeagleClient apiControl;
 	httplib::Client httpcli(settings->apiHost, settings->apiPort);
 
-
-	
+/*
 		Possible flows:
 		NEW DATA
 		1. user comes with nfc card, taps it. no data is downloadable.
@@ -115,7 +119,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 		2. user plays game
 		3. when device is removed, user taps card to confirm upload. Then, data is uploaded as normal.
 	
-
+*/
 	while (running)
 	{
 		//sleep for predetermined interval according to state
@@ -123,7 +127,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 		sleep_for = default_sleep;
 
 		// if card is not inserted, Accept NFC
-		if (!card->insertedCard && settings->nfc_uid.size() == 0) {
+		if (!simulator->isDeviceInserted() && settings->nfc_uid.size() == 0) {
 
 			// Poll NFC
 			std::string polled_uid = pollNFC();
@@ -147,11 +151,11 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 					do_download = true;
 				}
 			}
-		} else if (!card->insertedCard && lastDeviceState) {
+		} else if (!simulator->isDeviceInserted()  && lastDeviceState) {
 			// virtual device reshly removed. wait for an nfc tap for a limited time only!
 			wait_counter = 1;
 			lastDeviceState = false;
-		} else if (card->insertedCard) {
+		} else if (simulator->isDeviceInserted()) {
 			// virtual device freshly inserted
 			lastDeviceState = true;
 		}
@@ -159,9 +163,9 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 		if (do_download) {
 			//Download
 
-			if (apiControl.downloadSaveData(httpcli, settings, settings->nfc_uid, card->cardPath)) {
+			if (apiControl.downloadSaveData(httpcli, settings, settings->nfc_uid, simulator->getSaveDataPath())) {
 				//download is successful. insert virtual device
-				card->insertedCard = true;
+				simulator->InsertDevice();
 				downloadedSaveData = true;
 				download_uid = settings->nfc_uid;
 			}
@@ -173,9 +177,9 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 
 		if (do_upload) {
 			//loop will never get here if download_uid and the currently polled uid do not match
-			if (apiControl.uploadSaveData(httpcli, settings, settings->nfc_uid, card->cardPath)) {
-				ghc::filesystem::remove_all(card->cardPath);
-				ghc::filesystem::create_directory(card->cardPath);
+			if (apiControl.uploadSaveData(httpcli, settings, settings->nfc_uid, simulator->getSaveDataPath())) {
+				ghc::filesystem::remove_all(simulator->getSaveDataPath());
+				ghc::filesystem::create_directory(simulator->getSaveDataPath());
 			} else {
 				//Alert user that upload failed. Add it to a persistent queue?
 			}
@@ -187,7 +191,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 		if (wait_counter > 30) {
 			spdlog::info("fuckem");
 			//Fuck em, we waited an entire minute.
-			ghc::filesystem::remove_all(card->cardPath);
+			ghc::filesystem::remove_all(simulator->getSaveDataPath());
 			download_uid.clear();
 			wait_counter = 0;
 		}
@@ -196,7 +200,7 @@ static void NFCHost(AppSettings *settings, CardIo::Settings *card)
 	}
 
 }
-*/
+
 bool readAppConfig(AppSettings &settings)
 {
 	// Read in config values
@@ -226,16 +230,12 @@ int main()
 
 	AppSettings *settings = new AppSettings;
 
-
 	spdlog::info("Starting NFC Host/Network client");
-	//std::thread(NFCHost, settings, &cardHandler->cardSettings).detach();
+	std::thread(NFCHost, settings).detach();
 
 	spdlog::info("Entering main loop");
 	while (running) {
 		// TODO: device read/write should probably be a separate thread
-		std::this_thread::sleep_for(delay);
-
-		spdlog::dump_backtrace();
 		std::this_thread::sleep_for(delay);
 	}
 

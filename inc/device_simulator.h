@@ -23,17 +23,20 @@ struct DeviceSimulatorSettings
 	std::string saveDataBasePath;
 	std::string saveDataPath;
 };
+
 class DeviceSimulator
 {
 public:
-	virtual bool readConfig(std::string);
-	virtual bool DeviceInserted();
-	virtual bool DeviceReady();
-	virtual bool InsertDevice();
-	virtual bool RemoveDevice();
-	std::string getSaveDataPath();
+	DeviceSimulator() {}
+	virtual ~DeviceSimulator() {};
+	virtual bool readConfig(std::string) {return false;};
+	virtual bool isDeviceInserted() {return false;};
+	virtual bool DeviceReady() {return false;};
+	virtual bool InsertDevice() {return false;};
+	virtual bool RemoveDevice() {return false;};
+	std::string getSaveDataPath() { return m_DevSettings.saveDataPath; };
 protected:
-	DeviceSimulatorSettings mDevSettings;
+	DeviceSimulatorSettings m_DevSettings;
 private:
 };
 

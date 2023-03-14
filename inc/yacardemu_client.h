@@ -9,6 +9,7 @@
 
 #include "httplib.h"
 #include "spdlog/spdlog.h"
+#include "mini/ini.h"
 #include "ghc/filesystem.hpp"
 #include "archive_reader.hpp"
 #include "archive_writer.hpp"
@@ -27,17 +28,22 @@ struct YACardEmuSettings
 	unsigned int apiPort;
 	std::string saveDataBasePath;
 	std::string saveDataPath;
+	std::string defaultCardName;
 };
-class YACardEmuClient : DeviceSimulator
+
+class YACardEmuClient : public DeviceSimulator
 {
 public:
-	bool readConfig(std::string);
-	bool DeviceInserted();
-	bool DeviceReady();
-	bool InsertDevice();
-	bool RemoveDevice();
+	YACardEmuClient();
+	YACardEmuClient(std::string);
+	~YACardEmuClient();
+	bool readConfig(std::string) override;
+	bool isDeviceInserted() override;
+	bool DeviceReady() override;
+	bool InsertDevice(std::string);
+	bool RemoveDevice() override;
 protected:
-	YACardEmuSettings settings;
+	YACardEmuSettings m_settings;
 private:
 	httplib::Client *cli;
 	std::string apiToken;
