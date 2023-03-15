@@ -83,7 +83,6 @@ std::string pollNFC(void) {
 
 static void NFCHost(AppSettings *settings)
 {
-	bool downloadedSaveData = false;
 	bool do_download = false;
 	bool do_upload = false;
 	bool lastDeviceState = false;
@@ -166,7 +165,6 @@ static void NFCHost(AppSettings *settings)
 			if (apiControl.downloadSaveData(httpcli, settings, settings->nfc_uid, simulator->getSaveDataPath())) {
 				//download is successful. insert virtual device
 				simulator->InsertDevice();
-				downloadedSaveData = true;
 				download_uid = settings->nfc_uid;
 			}
 			else {
@@ -216,6 +214,13 @@ bool readAppConfig(AppSettings &settings)
 	if (ini.has("config")) {
 		//TODO: Read config
 		settings.targetDevice = ini["config"]["targetdevice"];
+		settings.gameId = std::stoi(ini["config"]["game_id"]);
+		settings.apiHost = ini["config"]["api_host"];
+		settings.apiBaseUrl = ini["config"]["api_base_url"];
+		settings.apiPort = std::stoi(ini["config"]["api_port"]);
+		settings.apiUser = ini["config"]["api_user"];
+		settings.apiPassword = ini["config"]["api_password"];
+		settings.uploadQueuePath = ini["config"]["upload_queue_path"];
 	}
 
 	return true;
@@ -228,14 +233,15 @@ int main()
 	std::signal(SIGINT, sigHandler);
 	std::signal(SIGTERM, sigHandler);
 
-	AppSettings *settings = new AppSettings;
+	AppSettings settings;
+	readAppConfig(settings);
 
 	spdlog::info("Starting NFC Host/Network client");
-	std::thread(NFCHost, settings).detach();
+	//std::thread(NFCHost, settings).detach();
+	NFCHost(&settings);
 
 	spdlog::info("Entering main loop");
 	while (running) {
-		// TODO: device read/write should probably be a separate thread
 		std::this_thread::sleep_for(delay);
 	}
 

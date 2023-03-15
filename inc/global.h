@@ -17,8 +17,7 @@ struct AppSettings
 	std::string apiUser;
 	std::string apiPassword;
 	std::string apiToken;
-	std::string saveDataBasePath;
-	std::string saveDataPath;
+	std::string uploadQueuePath;
 
 	std::string nfc_uid;
 

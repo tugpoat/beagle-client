@@ -30,7 +30,6 @@ public:
 	bool getAuthToken(httplib::Client &, AppSettings *);
 	bool downloadSaveData(httplib::Client &, AppSettings *, std::string, std::string);
 	bool uploadSaveData(httplib::Client &, AppSettings *, std::string, std::string);
-	static std::string bytesToHexString(const unsigned char* str, const uint64_t s);
 protected:
 	
 private:

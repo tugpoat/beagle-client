@@ -158,14 +158,3 @@ bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, s
 
 	return true;
 }
-
-
-std::string BeagleClient::bytesToHexString(const unsigned char* str, const uint64_t s) {
-  std::ostringstream ret;
-
-  for (size_t i = 0; i < s; ++i)
-    ret << std::hex << std::setfill('0') << std::setw(2) << std::nouppercase
-        << (int)str[i];
-
-  return ret.str();
-} 

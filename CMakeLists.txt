@@ -20,7 +20,6 @@ else()
 endif()
 
 include_directories(
-	${SERIAL_INCLUDE_DIRS}
 	${THREAD_INLCUDE_DIRS}
 	${PROJECT_SOURCE_DIR}/inc
 	${PROJECT_SOURCE_DIR}/lib/cpp-httplib
@@ -47,7 +46,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	endif()
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
