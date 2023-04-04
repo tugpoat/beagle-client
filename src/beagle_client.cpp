@@ -12,7 +12,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 
 	if (res->status != 200)
 	{
-		spdlog::info("Failed to get bearer token");
+		spdlog::info("BeagleClient::getAuthToken() - Failed to get bearer token");
 		return false;
 	} else {
 		// startpos = 17, which is how many characters that {"access token":" is comprised of.
@@ -20,7 +20,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 		std::size_t endpos = res->body.find("\",\"token_type");
 		this->apiToken = res->body.substr(17, endpos - 17);
 #ifndef NDEBUG
-		spdlog::debug("Got new bearer token: " + this->apiToken);
+		spdlog::debug("BeagleClient::getAuthToken() - Got new bearer token: " + this->apiToken);
 #endif
 	}
 	return true;
@@ -40,7 +40,7 @@ bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings,
 	// Send request
 	auto res = cli.Post("/v1/savedata/fetch", headers, jsonreq, "application/json");
 	if (!res) {
-		spdlog::error("Request failed! Network or server might be down.");
+		spdlog::error("BeagleClient::downloadSaveData() - Request failed!");
 		return false;
 	}
 
@@ -133,7 +133,7 @@ bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, s
 	// Send request
 	auto res = cli.Post("/v1/savedata/push", headers, items, "boundaryhuehue");
 	if (!res) {
-		spdlog::error("Request failed! Network or server might be down.");
+		spdlog::error("BeagleClient::uploadSaveData() - Request failed!");
 		return false;
 	}
 

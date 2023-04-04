@@ -93,7 +93,7 @@ static void NFCHost(AppSettings *settings)
 	std::string download_uid;
 
 	std::unique_ptr<DeviceSimulator> simulator;
-	simulator = std::make_unique<YACardEmuClient>();
+	simulator = std::make_unique<YACardEmuClient>("./yacardemu.ini");
 
 	BeagleClient apiControl;
 	httplib::Client httpcli(settings->apiHost, settings->apiPort);
@@ -236,10 +236,23 @@ int main()
 	AppSettings settings;
 	readAppConfig(settings);
 
+	spdlog::info("Starting YACardEmu client");
+
+	//Test device simulator
+	std::unique_ptr<DeviceSimulator> devSim;
+	devSim = std::make_unique<YACardEmuClient>("./yacardemu.ini");
+
+	if (devSim->isDeviceInserted())
+		spdlog::info("device inserted");
+	else
+		spdlog::info("device not inserted");
+
 	spdlog::info("Starting NFC Host/Network client");
 	//std::thread(NFCHost, settings).detach();
 	NFCHost(&settings);
 
+	
+/*
 	spdlog::info("Entering main loop");
 	while (running) {
 		std::this_thread::sleep_for(delay);
@@ -248,6 +261,6 @@ int main()
 	spdlog::info("Waiting 5s for threads to exit");
 	sleep(5);
 	spdlog::info("Exiting main thread normally");
-
+*/
 	return 0;
 }

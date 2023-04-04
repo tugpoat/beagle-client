@@ -2,13 +2,15 @@
 
 YACardEmuClient::YACardEmuClient() : DeviceSimulator()
 {
-
+spdlog::info("Constructing YACardEmuClient");
 }
 
 YACardEmuClient::YACardEmuClient(std::string cfgfile) : DeviceSimulator()
 {
-	this->readConfig(cfgfile);
-	this->cli = new httplib::Client(this->m_settings.apiHost, this->m_settings.apiPort);
+	spdlog::info("Constructing YACardEmuClient with config {}", cfgfile);
+	if (this->readConfig(cfgfile)) {
+		this->cli = new httplib::Client(this->m_settings.apiHost, this->m_settings.apiPort);
+	}
 }
 
 YACardEmuClient::~YACardEmuClient()
@@ -22,7 +24,7 @@ bool YACardEmuClient::readConfig(std::string cfgfile)
 	mINI::INIStructure ini;
 
 	if (!config.read(ini)) {
-		spdlog::critical("Unable to open config.ini!");
+		spdlog::critical("Unable to open %s", cfgfile.c_str());
 		return false;
 	}
 
@@ -38,6 +40,7 @@ bool YACardEmuClient::readConfig(std::string cfgfile)
 	return false;
 }
 
+//FIXME: needs a status type enum to accomodate for errors properly
 bool YACardEmuClient::isDeviceInserted()
 {
 	//httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
@@ -45,7 +48,7 @@ bool YACardEmuClient::isDeviceInserted()
 	auto res = this->cli->Get("/api/v1/hasCard");
 
 	if (!res) {
-		spdlog::error("Request failed! Network or server might be down.");
+		spdlog::error("YACardEmuClient::isDeviceInserted() - Request failed!");
 		return false;
 	}
 	if (res->body == "true") {
@@ -60,11 +63,11 @@ bool YACardEmuClient::isDeviceInserted()
 
 bool YACardEmuClient::DeviceReady()
 {
-	httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
+	//httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
 	auto res = this->cli->Get("/api/v1/readyCard");
 
 	if (!res) {
-		spdlog::error("Request failed! Network or server might be down.");
+		spdlog::error("YACardEmuClient::DeviceReady() - Request failed!");
 		return false;
 	}
 	if (res->body == "true")
@@ -81,11 +84,28 @@ bool YACardEmuClient::DeviceReady()
 bool YACardEmuClient::InsertDevice(std::string name = "card")
 {
 	httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
+
+	httplib::Headers headers = {
+		{ "DUMMY", "" }
+	};
+
+	httplib::MultipartFormDataItems items = {
+		 { "loadonly", "", "", "" },
+		 { "cardname", name, "", "" },
+	};
+
+	// Send request
+	auto res = cli.Post("/v1/savedata/push", headers, items, "boundaryhuehue");
+	if (!res) {
+		spdlog::error("YACardEmuClient::InsertDevice() - Request failed!");
+		return false;
+	}
+
 	return true;
 }
 
 bool YACardEmuClient::RemoveDevice()
 {
-	httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
+	spdlog::critical("RemoveDevice() Invalid for this driver");
 	return true;
 }

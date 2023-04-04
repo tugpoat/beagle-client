@@ -24,6 +24,16 @@ struct DeviceSimulatorSettings
 	std::string saveDataPath;
 };
 
+enum DeviceSimulatorStatus
+{
+	ERROR = -1
+	SUCCESS = 0
+	DEVICE_INSERTED = 1
+	DEVICE_REMOVED = 2
+	DEVICE_READY = 3
+	DEVICE_NOT_READY = 4
+};
+
 class DeviceSimulator
 {
 public:
