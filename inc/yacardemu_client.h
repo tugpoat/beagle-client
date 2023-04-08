@@ -39,10 +39,12 @@ public:
 	~YACardEmuClient();
 	bool readConfig(std::string) override;
 	bool isDeviceInserted() override;
-	bool DeviceReady() override;
-	bool InsertDevice(std::string);
-	bool RemoveDevice() override;
+	bool isDeviceReady() override;
+	DeviceSimulatorStatus InsertDevice(std::string);
+	DeviceSimulatorStatus RemoveDevice() override;
 protected:
+	DeviceSimulatorStatus DeviceInserted() override;
+	DeviceSimulatorStatus DeviceReady() override;
 	YACardEmuSettings m_settings;
 private:
 	httplib::Client *cli;

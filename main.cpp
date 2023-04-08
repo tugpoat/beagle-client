@@ -126,7 +126,7 @@ static void NFCHost(AppSettings *settings)
 		sleep_for = default_sleep;
 
 		// if card is not inserted, Accept NFC
-		if (!simulator->isDeviceInserted() && settings->nfc_uid.size() == 0) {
+		if (simulator->isDeviceInserted() && settings->nfc_uid.size() == 0) {
 
 			// Poll NFC
 			std::string polled_uid = pollNFC();
