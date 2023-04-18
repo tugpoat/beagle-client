@@ -9,6 +9,7 @@
 
 #include "httplib.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/async.h"
 #include "mini/ini.h"
 #include "ghc/filesystem.hpp"
 #include "archive_reader.hpp"
@@ -19,6 +20,8 @@
 #include "device_simulator.h"
 #include "utility.h"
 
+extern std::atomic<bool> running;
+extern std::shared_ptr<spdlog::async_logger> g_logger;
 
 struct YACardEmuSettings
 {
@@ -52,5 +55,4 @@ private:
 	bool lastCardState;
 };
 
-extern std::atomic<bool> running;
 #endif

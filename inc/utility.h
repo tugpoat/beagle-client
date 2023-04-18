@@ -9,6 +9,7 @@
 #include <string>
 
 #include "spdlog/spdlog.h"
+#include "spdlog/async.h"
 #include "ghc/filesystem.hpp"
 #include "archive_reader.hpp"
 #include "archive_writer.hpp"
@@ -16,6 +17,8 @@
 
 #include "global.h"
 #include "base64.h"
+
+extern std::shared_ptr<spdlog::async_logger> g_logger;
 
 struct membuf: std::streambuf // derive because std::streambuf constructor is protected
 {
@@ -28,6 +31,7 @@ struct membuf: std::streambuf // derive because std::streambuf constructor is pr
 
 std::string bytesToHexString(const unsigned char*, const uint64_t);
 bool readFile(const char*, std::vector<char> &);
+bool extractTarBuffer(std::string &, std::string);
 bool writeTarFromDirectory(std::string, std::string);
 
 #endif

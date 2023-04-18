@@ -48,17 +48,43 @@ bool readFile(const char* filename, std::vector<char> &target)
     return true;
 }
 
+bool extractTarBuffer(std::string &buf, std::string target)
+{
+	try
+		{
+			std::stringstream in(buf);   // Create stream from what we got from the server
+			// Generate archive reader from stream
+			namespace ar = ns_archive::ns_reader;
+			ns_archive::reader reader = ns_archive::reader::make_reader<ar::format::_ALL, ar::filter::_ALL>(in, 10240);
+
+			// Output each file in archive to the target directory
+			for(auto entry : reader)
+			{
+				std::ofstream savedata;
+				savedata.open(target + entry->get_header_value_pathname(), std::ofstream::out | std::ofstream::binary);
+				savedata << entry->get_stream().rdbuf();
+				savedata.close();
+			}
+		}
+		catch(ns_archive::archive_exception& e)
+		{
+			g_logger->error(e.what());
+			return false;
+		}
+		return true;
+}
+
 bool writeTarFromDirectory(std::string target, std::string source)
 {
 	std::ofstream ofs;
 	try
 	{
 #ifndef NDEBUG
-		spdlog::debug("opening file for writing: " + target);
+		g_logger->debug("opening file for writing: " + target);
 #endif
 		ofs.open(target);
 		if (!ofs) {
-			spdlog::error("writeTarFromDirectory(): Couldn't open file for writing: " + target);
+			g_logger->error("writeTarFromDirectory(): Couldn't open file for writing: " + target);
 			return false;
 		}
 		// Open tar to stream to
@@ -75,10 +101,10 @@ bool writeTarFromDirectory(std::string target, std::string source)
 				// Open the file.
 				std::ifstream infile(savedata, std::ios::in | std::ios::binary);
 #ifndef NDEBUG
-				spdlog::debug("opening file for reading" + savedata);
+				g_logger->debug("opening file for reading" + savedata);
 #endif
 				if (!infile) {
-					spdlog::error("Couldn't open file for reading: " + find);
+					g_logger->error("Couldn't open file for reading: " + find);
 
 					return false;
 				}
@@ -95,7 +121,7 @@ bool writeTarFromDirectory(std::string target, std::string source)
 				out_entry.set_header_value_pathname(savedata.substr(savedata.find_last_of("/") + 1));
 				writer.add_entry(out_entry);
 #ifndef NDEBUG
-				spdlog::debug("added " + savedata + " to tarfile");
+				g_logger->debug("added " + savedata + " to tarfile");
 #endif
 			}
 		}
@@ -104,12 +130,12 @@ bool writeTarFromDirectory(std::string target, std::string source)
 	}
 	catch(ns_archive::archive_exception& e)
 	{
-		spdlog::error(e.what());
+		g_logger->error(e.what());
 		ofs.close();
 		return false;
 	}
 	catch (ghc::filesystem::filesystem_error& e) {
-		spdlog::error(e.what());
+		g_logger->error(e.what());
 		ofs.close();
 		return false;
 	}

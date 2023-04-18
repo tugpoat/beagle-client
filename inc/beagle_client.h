@@ -11,6 +11,7 @@
 
 #include "httplib.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/async.h"
 #include "ghc/filesystem.hpp"
 #include "archive_reader.hpp"
 #include "archive_writer.hpp"
@@ -20,8 +21,7 @@
 #include "base64.h"
 #include "utility.h"
 
-
-
+extern std::shared_ptr<spdlog::async_logger> g_logger;
 
 class BeagleClient
 {

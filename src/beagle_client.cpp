@@ -12,7 +12,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 
 	if (res->status != 200)
 	{
-		spdlog::info("BeagleClient::getAuthToken() - Failed to get bearer token");
+		g_logger->info("BeagleClient::getAuthToken() - Failed to get bearer token");
 		return false;
 	} else {
 		// startpos = 17, which is how many characters that {"access token":" is comprised of.
@@ -20,7 +20,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 		std::size_t endpos = res->body.find("\",\"token_type");
 		this->apiToken = res->body.substr(17, endpos - 17);
 #ifndef NDEBUG
-		spdlog::debug("BeagleClient::getAuthToken() - Got new bearer token: " + this->apiToken);
+		g_logger->debug("BeagleClient::getAuthToken() - Got new bearer token: " + this->apiToken);
 #endif
 	}
 	return true;
@@ -28,7 +28,7 @@ bool BeagleClient::getAuthToken(httplib::Client &cli, AppSettings *settings)
 
 bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string dest_path)
 {
-	spdlog::info("Downloading savedata");
+	g_logger->info("Downloading savedata");
 
 	// Build request
 	httplib::Headers headers = {
@@ -40,25 +40,25 @@ bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings,
 	// Send request
 	auto res = cli.Post("/v1/savedata/fetch", headers, jsonreq, "application/json");
 	if (!res) {
-		spdlog::error("BeagleClient::downloadSaveData() - Request failed!");
+		g_logger->error("BeagleClient::downloadSaveData() - Request failed!");
 		return false;
 	}
 
 	// Validate response
 
 	if (res->status == 401) {
-		spdlog::info("Token invalid. Fetching new token");
+		g_logger->info("Token invalid. Fetching new token");
 		if (getAuthToken(cli, settings)) {
 			if (!downloadSaveData(cli, settings, savedata_uid, dest_path))
 				return false;
 			return true;
 		}
 	} else if (res->status == 404) {
-		spdlog::info("API endpoint not valid");
+		g_logger->info("API endpoint not valid");
 		return false;
 	}
 	else if (res->status != 200) {
-		spdlog::info("Server error");
+		g_logger->info("Server error");
 		return false;
 	}
 
@@ -67,7 +67,7 @@ bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings,
 	if (res->body[0] == '{' || res->body.length() < 1) {
 		// JSON returned. No data exists on server for this game and card, or there was an error
 		// No data to write.
-		spdlog::info("No savedata on server");
+		g_logger->info("No savedata on server");
 		return false;
 	} else {
 
@@ -91,33 +91,33 @@ bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings,
 		}
 		catch(ns_archive::archive_exception& e)
 		{
-			spdlog::error(e.what());
+			g_logger->error(e.what());
 		}
 	}
 
-	spdlog::info("Successfully acquired savedata");
+	g_logger->info("Successfully acquired savedata");
 
 	return true;
 }
 
 bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, std::string savedata_uid, std::string savedata_path)
 {
-	spdlog::info("Uploading savedata");
+	g_logger->info("Uploading savedata");
 	std::string tempfilepath = "/tmp/" + savedata_uid + ".tar";
 	if (!writeTarFromDirectory(tempfilepath, savedata_path)) {
-		spdlog::error("Couldn't write tempfile for savedata");
+		g_logger->error("Couldn't write tempfile for savedata");
 		return false;
 	}
 
 	std::vector<char> filedata;
 	if (!readFile(tempfilepath.c_str(), filedata)) {
-		spdlog::error("Couldn't read tempfile");
+		g_logger->error("Couldn't read tempfile");
 		return false;
 	}
 
 #ifndef NDEBUG
-	spdlog::debug("tempfile: " + tempfilepath);
-	spdlog::debug("tempfile size: " + std::to_string(filedata.size()));
+	g_logger->debug("tempfile: " + tempfilepath);
+	g_logger->debug("tempfile size: " + std::to_string(filedata.size()));
 #endif
 
 	// Build request
@@ -133,7 +133,7 @@ bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, s
 	// Send request
 	auto res = cli.Post("/v1/savedata/push", headers, items, "boundaryhuehue");
 	if (!res) {
-		spdlog::error("BeagleClient::uploadSaveData() - Request failed!");
+		g_logger->error("BeagleClient::uploadSaveData() - Request failed!");
 		return false;
 	}
 
@@ -143,14 +143,14 @@ bool BeagleClient::uploadSaveData(httplib::Client &cli, AppSettings *settings, s
 	// Validate response
 
 	if (res->status == 401) {
-		spdlog::info("Token invalid. Fetching new token");
+		g_logger->info("Token invalid. Fetching new token");
 		if (getAuthToken(cli, settings)) {
 			if (!uploadSaveData(cli, settings, savedata_uid, savedata_path))
 				return false;
 			return true;
 		}
 	} else if (res->status != 200) {
-		spdlog::info("HTTP error, code: " + std::to_string(res->status));
+		g_logger->info("HTTP error, code: " + std::to_string(res->status));
 		return false;
 	}
 

@@ -8,15 +8,14 @@
 #include <string>
 
 #include "spdlog/spdlog.h"
+#include "spdlog/async.h"
 #include "ghc/filesystem.hpp"
-#include "archive_reader.hpp"
-#include "archive_writer.hpp"
-#include "archive_exception.hpp"
 
 #include "global.h"
 #include "base64.h"
 #include "utility.h"
 
+extern std::shared_ptr<spdlog::async_logger> g_logger;
 
 struct DeviceSimulatorSettings
 {

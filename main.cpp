@@ -13,6 +13,8 @@
 #include "httplib.h"
 #include "mini/ini.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/async.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "ghc/filesystem.hpp"
 
@@ -22,8 +24,20 @@
 #include "utility.h"
 
 // Globals
-static const auto delay{std::chrono::microseconds(250)};
+constexpr static auto delay = std::chrono::microseconds(250);
 std::atomic<bool> running{true};
+std::shared_ptr<spdlog::async_logger> g_logger;
+
+
+const char *helptext = 
+	"YACardEmu - A simulator for magnetic card readers\n"
+	"Commandline arguments:\n"
+	"-d : debug log level\n"
+	"-t : trace log level\n"
+	"-f : log to yacardemu.log\n"
+	"-h : show this help text\n"
+	"\n";
+
 
 void sigHandler(int sig)
 {
@@ -226,12 +240,58 @@ bool readAppConfig(AppSettings &settings)
 	return true;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 
 	// Handle quitting gracefully via signals
 	std::signal(SIGINT, sigHandler);
 	std::signal(SIGTERM, sigHandler);
+
+#ifdef NDEBUG
+	spdlog::level::level_enum log_level = spdlog::level::info;
+#else
+	spdlog::level::level_enum log_level = spdlog::level::debug;
+#endif
+
+	bool file_log = false;
+	if (argc > 1) {
+		for (int i = 1; i < argc; i++) {
+			std::string arg = argv[i];
+			while (arg[0] == '-') arg.erase(0,1);
+			switch (arg[0]) {
+				case 'd': 
+					log_level = spdlog::level::debug;
+					break;
+				case 't': 
+					log_level = spdlog::level::trace;
+					break;
+				case 'f':
+					file_log = true;
+					break;
+				case 'h':
+				default:
+					std::cout << helptext;
+					return 0;
+			}
+		}
+	}
+
+	// Set up logger
+	spdlog::init_thread_pool(8192, 1);
+	auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt >();
+	std::vector<spdlog::sink_ptr> sinks;
+
+	if (file_log) {
+		auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("yacardemu.log", true);
+		sinks.push_back(file_sink);
+	}
+
+	sinks.push_back(stdout_sink);
+	g_logger = std::make_shared<spdlog::async_logger>("main", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+	g_logger->set_level(log_level);
+	g_logger->flush_on(spdlog::level::info);
+	g_logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
+
 
 	AppSettings settings;
 	readAppConfig(settings);
@@ -248,7 +308,7 @@ int main()
 		spdlog::info("device not inserted");
 
 	spdlog::info("Starting NFC Host/Network client");
-	//std::thread(NFCHost, settings).detach();
+	//std::thread(NFCHost, &settings).detach();
 	NFCHost(&settings);
 
 	
