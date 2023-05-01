@@ -62,11 +62,11 @@ target_link_libraries(${PROJECT_NAME}
 	archive_cpp_wrapper
 )
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/public
-		${CMAKE_CURRENT_BINARY_DIR}/public
-)
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#	COMMAND ${CMAKE_COMMAND} -E copy_directory
+#		${CMAKE_CURRENT_SOURCE_DIR}/public
+#		${CMAKE_CURRENT_BINARY_DIR}/public
+#)
 
 if (WIN32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -79,9 +79,9 @@ if (WIN32)
 			${CMAKE_CURRENT_SOURCE_DIR}/license.txt
 			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/license.txt
 	)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-			${CMAKE_CURRENT_SOURCE_DIR}/public
-			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/public
-	)
+#	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#		COMMAND ${CMAKE_COMMAND} -E copy_directory
+#			${CMAKE_CURRENT_SOURCE_DIR}/public
+#			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/public
+#	)
 endif()

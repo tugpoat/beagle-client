@@ -64,7 +64,7 @@ std::string pollNFC(void) {
 	// Initialize libnfc and set the nfc_context
 	nfc_init(&context);
 	if (context == NULL) {
-		spdlog::critical("Unable to init NFC");
+		g_logger->critical("Unable to init NFC");
 		return "";
 	}
 
@@ -82,7 +82,7 @@ std::string pollNFC(void) {
 	if (nfc_initiator_init(pnd) < 0) {
 		//nfc_perror(pnd, "nfc_initiator_init");
 	} else {
-		spdlog::info("Polling NFC...");
+		g_logger->info("Polling NFC...");
 		if (nfc_initiator_select_passive_target(pnd, nmMifare, NULL, 0, &nt) > 0)
 			retval=bytesToHexString(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
 	}
@@ -150,7 +150,7 @@ static void NFCHost(AppSettings *settings)
 				// Wait for the old one until the counter expires.
 				if (download_uid.size() > 0 && polled_uid != download_uid){
 					//TODO: Alert user somehow
-					spdlog::error("upload tap mismatches download tap");
+					g_logger->error("upload tap mismatches download tap");
 					//perhaps a button press to confirm using the new tap to upload data?
 					continue;
 				} else {
@@ -201,7 +201,7 @@ static void NFCHost(AppSettings *settings)
 		}
 
 		if (wait_counter > 30) {
-			spdlog::info("fuckem");
+			g_logger->info("fuckem");
 			//Fuck em, we waited an entire minute.
 			ghc::filesystem::remove_all(simulator->getSaveDataPath());
 			download_uid.clear();
@@ -221,7 +221,7 @@ bool readAppConfig(AppSettings &settings)
 	mINI::INIStructure ini;
 
 	if (!config.read(ini)) {
-		spdlog::critical("Unable to open config.ini!");
+		g_logger->critical("Unable to open config.ini!");
 		return false;
 	}
 
@@ -296,18 +296,27 @@ int main(int argc, char *argv[])
 	AppSettings settings;
 	readAppConfig(settings);
 
-	spdlog::info("Starting YACardEmu client");
 
-	//Test device simulator
+
+	
+	// Start Device Simulator
+	g_logger->info("Starting API client");
 	std::unique_ptr<DeviceSimulator> devSim;
-	devSim = std::make_unique<YACardEmuClient>("./yacardemu.ini");
+	if (settings.targetDevice == "yacardemu")
+		devSim = std::make_unique<YACardEmuClient>("./yacardemu.ini");
+	else {
+		g_logger->critical("Invalid target device specified");
+		return 1;
+	}
 
+	/*
 	if (devSim->isDeviceInserted())
 		spdlog::info("device inserted");
 	else
 		spdlog::info("device not inserted");
+	*/
 
-	spdlog::info("Starting NFC Host/Network client");
+	g_logger->info("Starting NFC Host/Network client");
 	//std::thread(NFCHost, &settings).detach();
 	NFCHost(&settings);
 
