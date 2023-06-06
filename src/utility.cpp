@@ -20,10 +20,10 @@ bool readFile(const char* filename, std::vector<char> &target)
     	return false;
     }
 
-    // Stop eating new lines in binary mode!!!
+    // Don't eat \n in binary mode
     file.unsetf(std::ios::skipws);
 
-    // get its size:
+    // Get filesize
     std::streampos fileSize;
 
     file.seekg(0, std::ios::end);

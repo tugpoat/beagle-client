@@ -70,29 +70,7 @@ bool BeagleClient::downloadSaveData(httplib::Client &cli, AppSettings *settings,
 		g_logger->info("No savedata on server");
 		return false;
 	} else {
-
-		// FIXME: BREAK THIS OUT INTO ITS OWN FUNCTION.
-		// Extract tar file
-		try
-		{
-			std::stringstream in(res->body);   // Create stream from what we got from the server
-			// Generate archive reader from stream
-			namespace ar = ns_archive::ns_reader;
-			ns_archive::reader reader = ns_archive::reader::make_reader<ar::format::_ALL, ar::filter::_ALL>(in, 10240);
-
-			// Output each file in archive to the target directory
-			for(auto entry : reader)
-			{
-				std::ofstream savedata;
-				savedata.open(dest_path + entry->get_header_value_pathname(), std::ofstream::out | std::ofstream::binary);
-				savedata << entry->get_stream().rdbuf();
-				savedata.close();
-			}
-		}
-		catch(ns_archive::archive_exception& e)
-		{
-			g_logger->error(e.what());
-		}
+		extractTarBuffer(res->body, dest_path);
 	}
 
 	g_logger->info("Successfully acquired savedata");

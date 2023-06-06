@@ -20,15 +20,6 @@
 
 extern std::shared_ptr<spdlog::async_logger> g_logger;
 
-struct membuf: std::streambuf // derive because std::streambuf constructor is protected
-{
-	membuf(char* p, size_t size)
-	{
-		setp( p, p + size); // set start end end pointers
-	}
-	size_t written() {return pptr()-pbase();} // how many bytes were really written?
-};
-
 std::string bytesToHexString(const unsigned char*, const uint64_t);
 bool readFile(const char*, std::vector<char> &);
 bool extractTarBuffer(std::string &, std::string);
