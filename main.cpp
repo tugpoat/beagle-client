@@ -30,11 +30,11 @@ std::shared_ptr<spdlog::async_logger> g_logger;
 
 
 const char *helptext = 
-	"YACardEmu - A simulator for magnetic card readers\n"
+	"Beagle.moe client\n"
 	"Commandline arguments:\n"
 	"-d : debug log level\n"
 	"-t : trace log level\n"
-	"-f : log to yacardemu.log\n"
+	"-f : log to beagleclient.log\n"
 	"-h : show this help text\n"
 	"\n";
 
@@ -226,7 +226,6 @@ bool readAppConfig(AppSettings &settings)
 	}
 
 	if (ini.has("config")) {
-		//TODO: Read config
 		settings.targetDevice = ini["config"]["targetdevice"];
 		settings.gameId = std::stoi(ini["config"]["game_id"]);
 		settings.apiHost = ini["config"]["api_host"];
@@ -282,7 +281,7 @@ int main(int argc, char *argv[])
 	std::vector<spdlog::sink_ptr> sinks;
 
 	if (file_log) {
-		auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("yacardemu.log", true);
+		auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("beagleclient.log", true);
 		sinks.push_back(file_sink);
 	}
 
@@ -292,13 +291,9 @@ int main(int argc, char *argv[])
 	g_logger->flush_on(spdlog::level::info);
 	g_logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
 
-
 	AppSettings settings;
 	readAppConfig(settings);
 
-
-
-	
 	// Start Device Simulator
 	g_logger->info("Starting API client");
 	std::unique_ptr<DeviceSimulator> devSim;
@@ -309,27 +304,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	/*
-	if (devSim->isDeviceInserted())
-		spdlog::info("device inserted");
-	else
-		spdlog::info("device not inserted");
-	*/
-
 	g_logger->info("Starting NFC Host/Network client");
 	//std::thread(NFCHost, &settings).detach();
 	NFCHost(&settings);
 
-	
-/*
-	spdlog::info("Entering main loop");
-	while (running) {
-		std::this_thread::sleep_for(delay);
-	}
-
-	spdlog::info("Waiting 5s for threads to exit");
-	sleep(5);
-	spdlog::info("Exiting main thread normally");
-*/
 	return 0;
 }
