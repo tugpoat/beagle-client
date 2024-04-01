@@ -24,9 +24,9 @@
 #include "utility.h"
 
 // Globals
-constexpr static auto delay = std::chrono::microseconds(250);
 std::atomic<bool> running{true};
 std::shared_ptr<spdlog::async_logger> g_logger;
+std::unique_ptr<DeviceSimulator> simulator;
 
 
 const char *helptext = 
@@ -105,9 +105,6 @@ static void NFCHost(AppSettings *settings)
 	const unsigned int default_sleep = 2;
 	unsigned int sleep_for = default_sleep;
 	std::string download_uid;
-
-	std::unique_ptr<DeviceSimulator> simulator;
-	simulator = std::make_unique<YACardEmuClient>("./yacardemu.ini");
 
 	BeagleClient apiControl;
 	httplib::Client httpcli(settings->apiHost, settings->apiPort);
@@ -201,13 +198,14 @@ static void NFCHost(AppSettings *settings)
 		}
 
 		if (wait_counter > 30) {
-			g_logger->info("fuckem");
+			g_logger->info("End of session tap timed out. No RFID/NFC card data available, deleting savedata and resetting.");
 			//Fuck em, we waited an entire minute.
 			ghc::filesystem::remove_all(simulator->getSaveDataPath());
 			download_uid.clear();
 			wait_counter = 0;
 		}
 		else if (wait_counter > 0)
+			//Update a display, buffer or something here maybe
 			wait_counter++;
 	}
 
@@ -246,7 +244,7 @@ int main(int argc, char *argv[])
 	std::signal(SIGINT, sigHandler);
 	std::signal(SIGTERM, sigHandler);
 
-#ifdef NDEBUG
+#ifndef DEBUG
 	spdlog::level::level_enum log_level = spdlog::level::info;
 #else
 	spdlog::level::level_enum log_level = spdlog::level::debug;
@@ -296,16 +294,15 @@ int main(int argc, char *argv[])
 
 	// Start Device Simulator
 	g_logger->info("Starting API client");
-	std::unique_ptr<DeviceSimulator> devSim;
+	
 	if (settings.targetDevice == "yacardemu")
-		devSim = std::make_unique<YACardEmuClient>("./yacardemu.ini");
+		simulator = std::make_unique<YACardEmuClient>("./yacardemu.ini");
 	else {
 		g_logger->critical("Invalid target device specified");
 		return 1;
 	}
 
 	g_logger->info("Starting NFC Host/Network client");
-	//std::thread(NFCHost, &settings).detach();
 	NFCHost(&settings);
 
 	return 0;

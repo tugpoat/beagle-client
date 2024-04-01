@@ -2,20 +2,20 @@
 
 YACardEmuClient::YACardEmuClient() : DeviceSimulator()
 {
-g_logger->info("Constructing YACardEmuClient");
+	g_logger->info("Constructing YACardEmuClient");
 }
 
 YACardEmuClient::YACardEmuClient(std::string cfgfile) : DeviceSimulator()
 {
 	g_logger->info("Constructing YACardEmuClient with config {}", cfgfile);
 	if (this->readConfig(cfgfile)) {
-		this->cli = new httplib::Client(this->m_settings.apiHost, this->m_settings.apiPort);
+		this->m_http_cli = std::make_unique<httplib::Client>(this->m_settings.apiHost, this->m_settings.apiPort);
 	}
 }
 
 YACardEmuClient::~YACardEmuClient()
 {
-	delete this->cli;
+
 }
 
 bool YACardEmuClient::readConfig(std::string cfgfile)
@@ -52,7 +52,7 @@ DeviceSimulatorStatus YACardEmuClient::DeviceInserted()
 {
 	//httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
 
-	auto res = this->cli->Get("/api/v1/hasCard");
+	auto res = this->m_http_cli->Get("/api/v1/hasCard");
 
 	if (!res) {
 		g_logger->error("YACardEmuClient::isDeviceInserted() - Request failed!");
@@ -81,7 +81,7 @@ bool YACardEmuClient::isDeviceReady()
 DeviceSimulatorStatus YACardEmuClient::DeviceReady()
 {
 	//httplib::Client cli(this->m_settings.apiHost, this->m_settings.apiPort);
-	auto res = this->cli->Get("/api/v1/readyCard");
+	auto res = this->m_http_cli->Get("/api/v1/readyCard");
 
 	if (!res) {
 		g_logger->error("YACardEmuClient::DeviceReady() - Request failed!");
@@ -115,7 +115,7 @@ DeviceSimulatorStatus YACardEmuClient::InsertDevice(std::string name = "card")
 	};
 
 	// Send request
-	auto res = cli.Post("/v1/insertedCard", headers, items, "boundaryhuehue");
+	auto res = this->m_http_cli->Post("/v1/insertedCard", headers, items, "boundaryhuehue");
 	if (!res) {
 		g_logger->error("YACardEmuClient::InsertDevice() - Request failed!");
 		return DeviceSimulatorStatus::ERROR;

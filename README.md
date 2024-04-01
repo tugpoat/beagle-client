@@ -1,6 +1,15 @@
 # beagle-client
 
+## Purpose
 
+This project is intended to be the software client portion of a system; the goal of which is to modernize outdated or outmoded arcade save game systems leveraging such things as magnetic cards or memory cards.
+
+It's intended that in a release, it would include include binary distributions or install instructions for emulators/simulators which have an API it can leverage
+
+## TODO
+- [ ] Make the application configuration loading for simulators more flexible
+- [ ] Use our own configuration files for specific settings that only our application needs, so we don't need to touch any emulator/simulator configs
+- [ ] Write a configurator tool of some sort for the above to configure a distribution
 
 ## Getting started
 

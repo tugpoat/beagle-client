@@ -33,7 +33,7 @@ public:
 protected:
 	
 private:
-	httplib::Client *cli;
+	std::unique_ptr<httplib::Client> m_http_cli;
 	std::string apiToken;
 	bool lastCardState;
 };
