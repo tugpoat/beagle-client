@@ -28,12 +28,12 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/lib/libarchive_cpp_wrapper
 )
 
-#if (ARM64)
-	#set( libarchive_LIBRARIES "/usr/aarch64-unknown-linux-gnu/usr/lib/libarchive.so" )
-  	#set( libarchive_INCLUDE_DIRS "" )
-#else()
+if (ARM64)
+	set( libarchive_LIBRARIES "/usr/aarch64-unknown-linux-gnu/usr/lib/libarchive.so" )
+  	set( libarchive_INCLUDE_DIRS "" )
+else()
 
-#endif()
+endif()
 
 add_subdirectory(lib/spdlog)
 add_subdirectory(lib/libarchive_cpp_wrapper)
@@ -62,11 +62,6 @@ target_link_libraries(${PROJECT_NAME}
 	archive_cpp_wrapper
 )
 
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#	COMMAND ${CMAKE_COMMAND} -E copy_directory
-#		${CMAKE_CURRENT_SOURCE_DIR}/public
-#		${CMAKE_CURRENT_BINARY_DIR}/public
-#)
 
 if (WIN32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -79,9 +74,4 @@ if (WIN32)
 			${CMAKE_CURRENT_SOURCE_DIR}/license.txt
 			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/license.txt
 	)
-#	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#		COMMAND ${CMAKE_COMMAND} -E copy_directory
-#			${CMAKE_CURRENT_SOURCE_DIR}/public
-#			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/public
-#	)
 endif()

@@ -1,0 +1,15 @@
+[config]
+basepath=./cards/
+autoselectedcard=card
+lport=8080
+targetdevice=C1231BR
+serialpath=/dev/ttyUSB0
+serialbaud=9600
+serialparity=even
+apihost=localhost
+apiport=8080
+apiclientport=8000
+apibaseurl=/
+apiusername=jmomma69
+apipassword=secret
+gameid=1
